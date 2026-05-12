@@ -1,0 +1,41 @@
+# Cloudflare Worker for install.anyex.ai
+#
+# Deploys:
+#   GET install.anyex.ai/polymarket          → serves install.sh from this repo
+#   GET install.anyex.ai/polymarket/SKILL.md → serves the skill manifest
+#   GET install.anyex.ai/                    → 302 to https://anyex.ai/polymarket
+#
+# Setup (one-time):
+#   1. Make sure `anyex.ai` is on Cloudflare and you've added the CNAME
+#      `install` for the worker's zone.
+#   2. `wrangler login` (or set CLOUDFLARE_API_TOKEN env var in CI).
+#   3. From this directory: `wrangler deploy`.
+#
+# To run locally:
+#   wrangler dev
+#
+# To roll back: `wrangler rollback` (lists previous deployments).
+
+name = "anyex-installer"
+main = "src/worker.ts"
+compatibility_date = "2026-05-01"
+
+# Optional: override the upstream raw URL (e.g. for staging from a different
+# branch). Leave commented to use the default Meowster-s-Kitchen/anyex-skills/main.
+# [vars]
+# REPO_RAW = "https://raw.githubusercontent.com/Meowster-s-Kitchen/anyex-skills/main"
+
+# ── Production route ────────────────────────────────────────────────────────
+# Maps to install.anyex.ai/*. Adjust the zone if anyex.ai lives in a different
+# Cloudflare account.
+[[routes]]
+pattern = "install.anyex.ai/*"
+zone_name = "anyex.ai"
+
+# ── Observability ───────────────────────────────────────────────────────────
+[observability]
+enabled = true
+
+# ── Workers Logs (tail) ─────────────────────────────────────────────────────
+# After deploy, stream live requests with:
+#   wrangler tail
