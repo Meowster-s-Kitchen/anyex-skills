@@ -10,7 +10,7 @@ Edge worker that serves the `curl | bash` install URL and exposes the skill mani
 | `GET install.anyex.ai/polymarket/install.sh` | Alias for `/polymarket`. |
 | `GET install.anyex.ai/polymarket/SKILL.md` | Serves the skill manifest as `text/markdown`. |
 | `GET install.anyex.ai/healthz` | Liveness probe. Returns `200 ok`. |
-| `GET install.anyex.ai/` | `302` to `https://anyex.ai/polymarket`. |
+| `GET install.anyex.ai/` | `302` to `https://polymarket.anyex.ai`. |
 
 All upstream content is fetched from `https://raw.githubusercontent.com/Meowster-s-Kitchen/anyex-skills/main`. Override with the `REPO_RAW` env var for staging.
 

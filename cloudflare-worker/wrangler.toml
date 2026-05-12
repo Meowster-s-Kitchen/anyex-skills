@@ -26,11 +26,13 @@ compatibility_date = "2026-05-01"
 # REPO_RAW = "https://raw.githubusercontent.com/Meowster-s-Kitchen/anyex-skills/main"
 
 # ── Production route ────────────────────────────────────────────────────────
-# Maps to install.anyex.ai/*. Adjust the zone if anyex.ai lives in a different
-# Cloudflare account.
+# Uses a Workers Custom Domain (custom_domain = true) so Cloudflare
+# auto-creates the DNS record for install.anyex.ai and routes ALL paths on
+# that hostname to this worker. Adjust the zone if anyex.ai lives in a
+# different Cloudflare account.
 [[routes]]
-pattern = "install.anyex.ai/*"
-zone_name = "anyex.ai"
+pattern = "install.anyex.ai"
+custom_domain = true
 
 # ── Observability ───────────────────────────────────────────────────────────
 [observability]

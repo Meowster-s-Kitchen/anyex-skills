@@ -12,7 +12,7 @@
  *   GET  /polymarket/install.sh       → alias for /polymarket (some users will
  *                                       guess this path).
  *   GET  /healthz                     → liveness probe.
- *   GET  /                            → 302 to https://anyex.ai/polymarket.
+ *   GET  /                            → 302 to https://polymarket.anyex.ai.
  *
  * Everything else 404s. The worker is a thin edge cache around the GitHub raw
  * URLs — no auth, no rate-limiting beyond Cloudflare's default DDoS protection.
@@ -32,7 +32,7 @@ interface Env {
 const DEFAULT_REPO_RAW =
   'https://raw.githubusercontent.com/Meowster-s-Kitchen/anyex-skills/main'
 
-const LANDING_URL = 'https://anyex.ai/polymarket'
+const LANDING_URL = 'https://polymarket.anyex.ai'
 
 const SKILL_DIR_NAME = 'Anyex-prediction-market-delegate-with-KiteAI'
 
