@@ -37,6 +37,13 @@ const LANDING_URL = 'https://polymarket.anyex.ai'
 const SKILL_DIR_NAME = 'Anyex-prediction-market-delegate-with-KiteAI'
 
 /**
+ * Bumped on every `wrangler deploy` to bust the upstream cache deterministically
+ * without dashboard-side purges. Just increment when shipping changes that need
+ * to propagate faster than the configured TTL.
+ */
+const WORKER_VERSION = '2'
+
+/**
  * Map a request path to the upstream file path on GitHub raw.
  * Returns null when the path is unmapped (will 404).
  */
@@ -99,16 +106,24 @@ export default {
     }
 
     const upstreamBase = env.REPO_RAW ?? DEFAULT_REPO_RAW
-    const upstreamUrl = upstreamBase + resolved.upstreamPath
+    // Cache-buster: ties the edge cache key to this worker's deployed code.
+    // Every `wrangler deploy` ships a new `WORKER_VERSION` constant below,
+    // which gives us a fresh cache key without manual purges. GitHub raw
+    // ignores extra query strings, so this is a no-op on the upstream side.
+    const upstreamUrl = `${upstreamBase}${resolved.upstreamPath}?v=${WORKER_VERSION}`
 
-    // Pass through. Edge-cache aggressively — these files change rarely and a
-    // stale cache during a GitHub raw outage is preferable to a hard fail.
-    // Cloudflare's default cache TTL for GET responses honors the Cache-Control
-    // headers we set here.
+    // Pass through. Edge-cache lightly — install.sh + SKILL.md change rarely
+    // but when they DO change we want propagation in tens of seconds, not
+    // minutes. cf.cacheTtlByStatus lets us cache 200s for a minute while
+    // bypassing cache on 4xx/5xx upstream errors.
     const upstream = await fetch(upstreamUrl, {
       cf: {
-        cacheTtl: 300,           // 5 min fresh
         cacheEverything: true,
+        cacheTtlByStatus: {
+          '200-299': 60,
+          '404': 5,
+          '500-599': 0,
+        },
       },
     })
 
@@ -126,7 +141,7 @@ export default {
       status: 200,
       headers: {
         'content-type': resolved.contentType,
-        'cache-control': 'public, max-age=300, s-maxage=300',
+        'cache-control': 'public, max-age=60, s-maxage=60',
         'x-served-by': 'install.anyex.ai',
         'access-control-allow-origin': '*',
       },
